@@ -85,12 +85,12 @@ def play_movie(menuid, page, videoid):
             msg = ['cannot play video stream']
             plugin.log.error(msg[0])
             dialog = xbmcgui.Dialog()
-            dialog.ok(api.long_name, *msg)
+            dialog.ok(api.LONG_NAME, *msg)
     else:
         msg = ['video url not found']
         plugin.log.error(msg[0])
         dialog = xbmcgui.Dialog()
-        dialog.ok(api.long_name, *msg)
+        dialog.ok(api.LONG_NAME, *msg)
 
 
 def __resolve_item(url, title):
