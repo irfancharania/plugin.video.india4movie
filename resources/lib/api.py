@@ -8,6 +8,7 @@ from BeautifulSoup import SoupStrainer
 class SiteApi():
 
     MAIN_URL = 'http://www.india4movie.com/'
+    LONG_NAME = 'India 4 Movie'
 
     def get_menu_category(self):
         '''
