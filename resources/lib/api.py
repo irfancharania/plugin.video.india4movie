@@ -66,7 +66,7 @@ class SiteApi():
                 'thumb': thumb,
                 'info': info,
                 'pk': pk,
-                'is_playable': True
+                'is_playable': False
             })
 
         return items
@@ -97,8 +97,39 @@ class SiteApi():
 
         return None
 
-    def get_movie(self, url):
-        print 'Get movie: {url}'.format(url=url)
+    def get_movie_links(self, url):
+        print 'Get movie links: {url}'.format(url=url)
+
+        data = util.get_remote_data(url)
+        product = SoupStrainer('a', href=re.compile("^http\:\/\/www\.power4link\.us"))
+
+        soup = BeautifulStoneSoup(data, parseOnlyThese=product,
+                                  convertEntities=BeautifulSoup.XML_ENTITIES)
+        items = []
+
+        pk_regex = re.compile('.*\/.*-(.*)\/')
+
+        for a in soup:
+            if a.text.startswith('Play'):
+                link = a['href'].encode('utf-8', 'ignore')
+
+                match = pk_regex.search(link)
+                if match:                    
+                    label = match.group(1)
+                    pk = label
+        
+                    items.append({
+                        'label': label,
+                        'url': link,
+                        'pk': pk,
+                        'is_playable': True
+                    })
+
+        return items
+
+
+    def resolve_redirect(self, url):
+        print 'Resolving redirect: {url}'.format(url=url)
 
         data = util.get_remote_data(url)
         product = SoupStrainer('iframe')

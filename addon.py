@@ -25,7 +25,7 @@ def index():
     return items
 
 
-@plugin.cached_route('/<menuid>/<page>')
+@plugin.cached_route('/<menuid>/page/<page>')
 def browse_category(menuid, page='1'):
     '''
     Get list of movies from category
@@ -37,15 +37,14 @@ def browse_category(menuid, page='1'):
 
     items = [{
         'label': item['label'],
-        'is_playable': True,
         'thumbnail': item['thumb'],
         'icon': item['thumb'],
         'info': {
             'plot': item['info']
         },
         'path': plugin.url_for(
-            'play_movie', menuid=menuid, page=page,
-            videoid=item.get('pk', '0'), url=item['url'])
+            'browse_movie', menuid=menuid, page=page,
+            movieid=item.get('pk', '0'), url=item['url'])
     } for item in movies]
 
     # build next link
@@ -61,21 +60,40 @@ def browse_category(menuid, page='1'):
     return items
 
 
-@plugin.route('/<menuid>/<page>/<videoid>/')
-def play_movie(menuid, page, videoid):
+@plugin.route('/<menuid>/page/<page>/movie/<movieid>/')
+def browse_movie(menuid, page, movieid):
     '''
-    Resolve video url
+    Get links for movie
     '''
-    plugin.log.debug('Get movie')
+    plugin.log.debug('Get movie links')
 
     page_url = plugin.request.args['url'][0]
-    url = api.get_movie(page_url)
+    links = api.get_movie_links(page_url)
+
+    items = [{
+        'label': item['label'],
+        'is_playable': item['is_playable'],
+        'path': plugin.url_for(
+            'resolve_movie', menuid=menuid, page=page,
+            movieid=movieid, linkid=item.get('pk', '0'), 
+            url=item['url'])
+    } for item in links]
+
+    return items
+
+@plugin.route('/<menuid>/page/<page>/movie/<movieid>/<linkid>')
+def resolve_movie(menuid, page, movieid, linkid):
+    '''
+    Play movie
+    '''
+    page_url = plugin.request.args['url'][0]
+    url = api.resolve_redirect(page_url)
 
     print 'resolve video: {url}'.format(url=url)
     plugin.log.debug('resolve video: {url}'.format(url=url))
 
     if url:
-        media = __resolve_item(url, videoid)
+        media = __resolve_item(url, movieid)
 
         print 'resolved to: {url}'.format(url=media)
 
