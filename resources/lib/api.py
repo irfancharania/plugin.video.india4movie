@@ -7,7 +7,7 @@ from BeautifulSoup import SoupStrainer
 
 class SiteApi():
 
-    MAIN_URL = 'http://www.india4movie.com/'
+    MAIN_URL = 'http://www.india4movie.co/'
     LONG_NAME = 'India 4 Movie'
 
     def get_menu_category(self):
@@ -28,6 +28,9 @@ class SiteApi():
         for item in soup.findAll('li'):
             link = item.a['href'].encode('utf-8', 'ignore')
             pk = item['id']
+
+            # ignore invalid links
+            if not 'category/' in link: continue
 
             items.append({
                 'label': item.text,
