@@ -91,12 +91,13 @@ class SiteApi():
         if current_item:
             next_item = current_item.findNextSibling()
 
-            item = {
-                'label': '[B]Next >> [/B]',
-                'url': next_item['href'],
-                'pk': next_item.text
-            }
-            return item
+            if next_item:
+                item = {
+                    'label': '[B]Next >> [/B]',
+                    'url': next_item['href'],
+                    'pk': next_item.text
+                }
+                return item
 
         return None
 
