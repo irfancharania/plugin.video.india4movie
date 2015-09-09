@@ -105,7 +105,7 @@ class SiteApi():
         print 'Get movie links: {url}'.format(url=url)
 
         data = util.get_remote_data(url)
-        product = SoupStrainer('a', href=re.compile("^http\:\/\/www\.power4link\.us"))
+        product = SoupStrainer('a', href=re.compile("^http\:\/\/(?:www\.)?(power4link\.us|watchmoviesonline4u\.com)"))
 
         soup = BeautifulStoneSoup(data, parseOnlyThese=product,
                                   convertEntities=BeautifulSoup.XML_ENTITIES)
