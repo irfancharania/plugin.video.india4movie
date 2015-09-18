@@ -30,7 +30,8 @@ class SiteApi():
             pk = item['id']
 
             # ignore invalid links
-            if not 'category/' in link: continue
+            if 'category/' not in link:
+                continue
 
             items.append({
                 'label': item.text,
@@ -59,7 +60,8 @@ class SiteApi():
 
         for item in soup:
             link = item.a['href'].encode('utf-8', 'ignore')
-            thumb = item.a.img['src'].encode('utf-8', 'ignore')
+            img = item.a.img
+            thumb = item.a.img['src'].encode('utf-8', 'ignore') if img else ''
             info = item.p.text
             pk = pk_regex.search(item.a['href']).group(1)
 
@@ -118,10 +120,10 @@ class SiteApi():
                 link = a['href'].encode('utf-8', 'ignore')
 
                 match = pk_regex.search(link)
-                if match:                    
+                if match:
                     label = match.group(1)
                     pk = label
-        
+
                     items.append({
                         'label': label,
                         'url': link,
@@ -130,7 +132,6 @@ class SiteApi():
                     })
 
         return items
-
 
     def resolve_redirect(self, url):
         print 'Resolving redirect: {url}'.format(url=url)
