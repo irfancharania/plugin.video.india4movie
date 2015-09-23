@@ -107,21 +107,23 @@ class SiteApi():
         print 'Get movie links: {url}'.format(url=url)
 
         data = util.get_remote_data(url)
-        product = SoupStrainer('a', href=re.compile("^http\:\/\/(?:www\.)?(power4link\.us|watchmoviesonline4u\.com)"))
+        product = SoupStrainer('a', rel="nofollow")
 
         soup = BeautifulStoneSoup(data, parseOnlyThese=product,
                                   convertEntities=BeautifulSoup.XML_ENTITIES)
         items = []
 
-        pk_regex = re.compile('.*\/.*-(.*)\/')
+        pk_regex = re.compile('http://([\w\.]+)\/(?:([\w-]+)\/|)')
 
         for a in soup:
-            if a.text.startswith('Play'):
+            if 'Full' in a.text and 'Online' in a.text:
                 link = a['href'].encode('utf-8', 'ignore')
 
                 match = pk_regex.search(link)
                 if match:
-                    label = match.group(1)
+                    group1 = match.group(1)
+                    group2 = match.group(2)
+                    label = group2 if group2 else group1
                     pk = label
 
                     items.append({
