@@ -14,6 +14,9 @@
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
     <language>en</language>
+    <website>http://www.india4movie.co/</website>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+    <source>https://github.com/irfancharania/plugin.video.india4movie</source>
     <summary lang="en">India4movie addon scrapes movies from www.india4movie.com</summary>
     <description>www.india4movie.com provides movies in the following categories: Dubbed, Pakistani, Hindi, Hollywood, Malayalam, Marathi, Punjabi, Tamil, Telegu
 
