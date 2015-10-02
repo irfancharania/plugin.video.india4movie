@@ -1,3 +1,8 @@
+0.0.8 - Add search
+
+0.0.7 - Update links to parse
+      - List movies without thumbnails
+
 0.0.6 - Update links to parse
 
 0.0.5 - Fix next link

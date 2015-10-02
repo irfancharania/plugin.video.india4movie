@@ -1,5 +1,6 @@
 from xbmcswift2 import Plugin, xbmcgui
 from resources.lib.api import SiteApi
+import urllib
 
 
 plugin = Plugin()
@@ -22,7 +23,43 @@ def index():
             page=1, url=item['url'])
     } for item in c]
 
+    # search
+    items.insert(0, {
+        'label': "[B]** Search **[/B]",
+        'path': plugin.url_for('search')
+    })
+
     return items
+
+
+@plugin.route('/search/')
+def search():
+    query = get_args('input') or plugin.keyboard(
+        heading='Search'
+    )
+    if query:
+        enc = urllib.quote_plus(query)
+        movies = api.search(search_terms=enc)
+
+        items = [{
+            'label': item['label'],
+            'thumbnail': item['thumb'],
+            'icon': item['thumb'],
+            'info': {
+                'plot': item['info']
+            },
+            'path': plugin.url_for(
+                'browse_movie', menuid=0, page=1,
+                movieid=item.get('pk', '0'), url=item['url'])
+        } for item in movies]
+
+        return items
+
+    else:
+        msg = ['No search terms provided']
+        plugin.log.error(msg[0])
+        dialog = xbmcgui.Dialog()
+        dialog.ok(api.LONG_NAME, *msg)
 
 
 @plugin.cached_route('/<menuid>/page/<page>')
@@ -47,15 +84,16 @@ def browse_category(menuid, page='1'):
             movieid=item.get('pk', '0'), url=item['url'])
     } for item in movies]
 
-    # build next link
-    next_link = api.get_next_link(url)
-    if next_link:
-        items.append({
-            'label': next_link['label'],
-            'path': plugin.url_for(
-                'browse_category', menuid=item.get('pk', '0'),
-                page=next_link['pk'], url=next_link['url'])
-        })
+    if len(items) > 1:
+        # build next link
+        next_link = api.get_next_link(url)
+        if next_link:
+            items.append({
+                'label': next_link['label'],
+                'path': plugin.url_for(
+                    'browse_category', menuid=item.get('pk', '0'),
+                    page=next_link['pk'], url=next_link['url'])
+            })
 
     return items
 
@@ -75,11 +113,12 @@ def browse_movie(menuid, page, movieid):
         'is_playable': item['is_playable'],
         'path': plugin.url_for(
             'resolve_movie', menuid=menuid, page=page,
-            movieid=movieid, linkid=item.get('pk', '0'), 
+            movieid=movieid, linkid=item.get('pk', '0'),
             url=item['url'])
     } for item in links]
 
     return items
+
 
 @plugin.route('/<menuid>/page/<page>/movie/<movieid>/<linkid>')
 def resolve_movie(menuid, page, movieid, linkid):
@@ -94,21 +133,24 @@ def resolve_movie(menuid, page, movieid, linkid):
 
     if url:
         media = __resolve_item(url, movieid)
-
         print 'resolved to: {url}'.format(url=media)
 
-        if media:
+        if __is_resolved(media):
             plugin.set_resolved_url(media)
         else:
-            msg = ['cannot play video stream']
-            plugin.log.error(msg[0])
-            dialog = xbmcgui.Dialog()
-            dialog.ok(api.LONG_NAME, *msg)
+            if media is False:
+                msg = 'Unresolvable link'
+            else:
+                msg = str(media.msg)
+            raise Exception(msg)
+
     else:
-        msg = ['video url not found']
-        plugin.log.error(msg[0])
-        dialog = xbmcgui.Dialog()
-        dialog.ok(api.LONG_NAME, *msg)
+        msg = 'video url not found'
+        raise Exception(msg)
+
+
+def __is_resolved(url):
+    return (url and isinstance(url, basestring))
 
 
 def __resolve_item(url, title):
@@ -122,10 +164,14 @@ def __resolve_item(url, title):
 ###############################################
 
 
+def get_args(arg_name, default=None):
+    return plugin.request.args.get(arg_name, [default])[0]
+
+
 if __name__ == '__main__':
     try:
         plugin.run()
     except Exception, e:
         print e
         plugin.log.error(e)
-        plugin.notify(msg=e)
+        plugin.notify(msg=e, delay=8000)

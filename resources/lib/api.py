@@ -10,6 +10,17 @@ class SiteApi():
     MAIN_URL = 'http://www.india4movie.co/'
     LONG_NAME = 'India 4 Movie'
 
+    def search(self, query):
+        print 'Searching: ' + query
+
+        items = []
+
+        if query:
+            url = '{base}?s={query}'.format(base=self.MAIN_URL, query=query)
+            items = self.get_menu_movies(url)
+
+        return items
+
     def get_menu_category(self):
         '''
         Get main list of categories
@@ -62,7 +73,7 @@ class SiteApi():
             link = item.a['href'].encode('utf-8', 'ignore')
             img = item.a.img
             thumb = item.a.img['src'].encode('utf-8', 'ignore') if img else ''
-            info = item.p.text
+            info = item.p.text if item.p else ''
             pk = pk_regex.search(item.a['href']).group(1)
 
             items.append({
