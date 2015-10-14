@@ -1,8 +1,7 @@
 import resources.lib.util as util
 import re
-from BeautifulSoup import BeautifulSoup
-from BeautifulSoup import BeautifulStoneSoup
-from BeautifulSoup import SoupStrainer
+from bs4 import BeautifulSoup
+from bs4 import SoupStrainer
 
 
 class SiteApi():
@@ -29,10 +28,9 @@ class SiteApi():
 
         url = self.MAIN_URL
         data = util.get_remote_data(url)
-        product = SoupStrainer('div', {'class': 'menu-secondary-container'})
-
-        soup = BeautifulStoneSoup(data, parseOnlyThese=product,
-                                  convertEntities=BeautifulSoup.XML_ENTITIES)
+        soup = BeautifulSoup(data, 'html.parser',
+                             parse_only=SoupStrainer('div', {'class': 'menu-secondary-container'})
+                             )
 
         items = []
 
@@ -61,31 +59,30 @@ class SiteApi():
         data = util.get_remote_data(url)
 
         # Get list of movie titles
-        soup = BeautifulStoneSoup(data, convertEntities=BeautifulSoup.XML_ENTITIES)
+        soup = BeautifulSoup(data, 'html.parser',
+                             parse_only=SoupStrainer('div', {'class': 'entry clearfix'})
+                             )
         items = []
 
         pk_regex = re.compile('\/([\w\-]+)\/')
-        filtered = soup.findAll(True, {'class': ['lh-home-thumb', 'lh-home-title']})
 
-        # REALLY ugly but site HTML stucture doesn't get parsed properly
-        for item in filtered:
-            img = item.img
+        for item in soup:
+            img = item.a.img
+            thumb = img['src'].encode('utf-8', 'ignore')
 
-            if img:
-                thumb = img['src'].encode('utf-8', 'ignore')
-            else:
-                link = item.a['href'].encode('utf-8', 'ignore')
-                info = item.a.text
-                pk = pk_regex.search(item.a['href']).group(1)
+            link = item.a['href'].encode('utf-8', 'ignore')
+            info = item.h4.text.strip()
+            label = info
+            pk = pk_regex.search(item.a['href']).group(1)
 
-                items.append({
-                    'label': item.text,
-                    'url': link,
-                    'thumb': thumb,
-                    'info': info,
-                    'pk': pk,
-                    'is_playable': False
-                })
+            items.append({
+                'label': label,
+                'url': link,
+                'thumb': thumb,
+                'info': info,
+                'pk': pk,
+                'is_playable': False
+            })
 
         return items
 
@@ -98,21 +95,20 @@ class SiteApi():
         data = util.get_remote_data(url)
 
         # Get list of movie titles
-        product = SoupStrainer('div', {'class': 'wp-pagenavi'})
+        soup = BeautifulSoup(data, 'html.parser',
+                             parse_only=SoupStrainer('a', rel='next')
+                             )
 
-        soup = BeautifulStoneSoup(data, parseOnlyThese=product,
-                                  convertEntities=BeautifulSoup.XML_ENTITIES)
-        current_item = soup.find('span', {'class': 'current'})
-        if current_item:
-            next_item = current_item.findNextSibling()
-
-            if next_item:
-                item = {
-                    'label': '[B]Next >> [/B]',
-                    'url': next_item['href'],
-                    'pk': next_item.text
-                }
-                return item
+        if soup:
+            link = soup.a['href']
+            page = link.rstrip('/').rsplit('/', 1)[1]
+            
+            item = {
+                'label': '[B]Next >> [/B]',
+                'url': link,
+                'pk': page
+            }
+            return item
 
         return None
 
@@ -120,10 +116,10 @@ class SiteApi():
         print 'Get movie links: {url}'.format(url=url)
 
         data = util.get_remote_data(url)
-        product = SoupStrainer('a', rel="nofollow")
 
-        soup = BeautifulStoneSoup(data, parseOnlyThese=product,
-                                  convertEntities=BeautifulSoup.XML_ENTITIES)
+        soup = BeautifulSoup(data, 'html.parser',
+                             parse_only=SoupStrainer('a', rel='nofollow')
+                             )
         items = []
 
         pk_regex = re.compile('http://([\w\.]+)\/(?:([\w-]+)\/|)')
@@ -152,12 +148,18 @@ class SiteApi():
         print 'Resolving redirect: {url}'.format(url=url)
 
         data = util.get_remote_data(url)
-        product = SoupStrainer('iframe')
+        soup = BeautifulSoup(data, 'html.parser',
+                             parse_only=SoupStrainer('div', id='content')
+                             )
+        link = None
 
-        soup = BeautifulStoneSoup(data, parseOnlyThese=product,
-                                  convertEntities=BeautifulSoup.XML_ENTITIES)
+        iframe = soup.find('iframe')
+        if iframe:
+            link = iframe['src']
+        else:
+            direct = soup.find('a', rel='nofollow')
+            if direct:
+                link = direct['href']
 
-        if soup.iframe:
-            return soup.iframe['src']
 
-        return None
+        return link
