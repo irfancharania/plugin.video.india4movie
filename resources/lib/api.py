@@ -61,29 +61,31 @@ class SiteApi():
         data = util.get_remote_data(url)
 
         # Get list of movie titles
-        product = SoupStrainer('div', {'class': 'entry clearfix'})
-
-        soup = BeautifulStoneSoup(data, parseOnlyThese=product,
-                                  convertEntities=BeautifulSoup.XML_ENTITIES)
+        soup = BeautifulStoneSoup(data, convertEntities=BeautifulSoup.XML_ENTITIES)
         items = []
 
         pk_regex = re.compile('\/([\w\-]+)\/')
+        filtered = soup.findAll(True, {'class': ['lh-home-thumb', 'lh-home-title']})
 
-        for item in soup:
-            link = item.a['href'].encode('utf-8', 'ignore')
-            img = item.a.img
-            thumb = item.a.img['src'].encode('utf-8', 'ignore') if img else ''
-            info = item.p.text if item.p else ''
-            pk = pk_regex.search(item.a['href']).group(1)
+        # REALLY ugly but site HTML stucture doesn't get parsed properly
+        for item in filtered:
+            img = item.img
 
-            items.append({
-                'label': item.text,
-                'url': link,
-                'thumb': thumb,
-                'info': info,
-                'pk': pk,
-                'is_playable': False
-            })
+            if img:
+                thumb = img['src'].encode('utf-8', 'ignore')
+            else:
+                link = item.a['href'].encode('utf-8', 'ignore')
+                info = item.a.text
+                pk = pk_regex.search(item.a['href']).group(1)
+
+                items.append({
+                    'label': item.text,
+                    'url': link,
+                    'thumb': thumb,
+                    'info': info,
+                    'pk': pk,
+                    'is_playable': False
+                })
 
         return items
 
