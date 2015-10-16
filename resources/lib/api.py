@@ -43,7 +43,7 @@ class SiteApi():
                 continue
 
             items.append({
-                'label': item.text,
+                'label': item.a.text,
                 'url': link,
                 'pk': pk,
             })
