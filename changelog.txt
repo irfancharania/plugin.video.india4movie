@@ -1,3 +1,6 @@
+0.0.11 - Fix category labels
+       - Fix search
+
 0.0.10 - Switch to BeautifulSoup4
 
 0.0.9 - Update movie list parser

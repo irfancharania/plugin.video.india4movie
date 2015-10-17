@@ -39,7 +39,7 @@ def search():
     )
     if query:
         enc = urllib.quote_plus(query)
-        movies = api.search(search_terms=enc)
+        movies = api.search(enc)
 
         items = [{
             'label': item['label'],
