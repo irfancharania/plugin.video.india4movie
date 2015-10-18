@@ -148,18 +148,18 @@ class SiteApi():
         print 'Resolving redirect: {url}'.format(url=url)
 
         data = util.get_remote_data(url)
-        soup = BeautifulSoup(data, 'html.parser',
-                             parse_only=SoupStrainer('div', id='content')
-                             )
+        soup = BeautifulSoup(data, 'html.parser')
         link = None
 
         iframe = soup.find('iframe')
         if iframe:
-            link = iframe['src']
+            link = iframe['data-lazy-src']
+            if not link:
+                link = iframe['src']
         else:
             direct = soup.find('a', rel='nofollow')
             if direct:
                 link = direct['href']
 
-
+        print 'Resolving link: {link}'.format(link=link)
         return link
