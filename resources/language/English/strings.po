@@ -1,0 +1,59 @@
+# XBMC Media Center language file
+# Addon Name: India4Movie
+# Addon id: plugin.video.india4movie
+# Addon Provider: Irfan Charania
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en_US\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30000"
+msgid "india4movie"
+msgstr ""
+
+#########################
+
+msgctxt "#30050"
+msgid "Please try again"
+msgstr ""
+
+msgctxt "#30051"
+msgid "Website is unavailable"
+msgstr ""
+
+msgctxt "#30052"
+msgid "is unavailable at this time"
+msgstr ""
+
+msgctxt "#30053"
+msgid "Please try again at a later time"
+msgstr ""
+
+msgctxt "#30057"
+msgid "No valid links found."
+msgstr ""
+
+msgctxt "#30058"
+msgid "Unable to play video"
+msgstr ""
+
+msgctxt "#30060"
+msgid "No search terms provided"
+msgstr ""
+
+msgctxt "#30061"
+msgid "Video url not found"
+msgstr ""
+
+msgctxt "#30062"
+msgid "Unresolvable link"
+msgstr ""
+
+#########################
+
+msgctxt "#30100"
+msgid "Url Resolver Settings"
+msgstr ""

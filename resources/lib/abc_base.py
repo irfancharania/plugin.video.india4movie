@@ -1,13 +1,25 @@
-import resources.lib.util as util
+import abc
 import re
+import resources.lib.util as util
+from xbmcswift2 import xbmcgui
 from bs4 import BeautifulSoup
 from bs4 import SoupStrainer
 
 
-class SiteApi():
+class BaseI4M(object):
+    __metaclass__ = abc.ABCMeta
 
-    MAIN_URL = 'http://www.india4movie.co/'
-    LONG_NAME = 'India 4 Movie'
+    BASE_URL = ''
+    SHORT_NAME = 'base'
+    LONG_NAME = 'Base'
+    LOCAL_THUMB = ''
+
+    SoupStrainer_Category = SoupStrainer('div', {'class': 'menu-secondary-container'})
+    SoupStrainer_Movies = SoupStrainer('div', {'class': 'entry clearfix'})
+    SoupStrainer_Next_Link = SoupStrainer('a', rel='next')
+    SoupStrainer_Movie_Link = SoupStrainer('a', rel='nofollow')
+
+###############################################
 
     def search(self, query):
         print 'Searching: ' + query
@@ -15,38 +27,39 @@ class SiteApi():
         items = []
 
         if query:
-            url = '{base}?s={query}'.format(base=self.MAIN_URL, query=query)
+            url = '{base}?s={query}'.format(base=self.BASE_URL, query=query)
             items = self.get_menu_movies(url)
 
         return items
 
-    def get_menu_category(self):
+    def get_menu_category(self, api):
         '''
         Get main list of categories
         '''
         print 'Get list categories'
 
-        url = self.MAIN_URL
+        url = self.BASE_URL
         data = util.get_remote_data(url)
         soup = BeautifulSoup(data, 'html.parser',
-                             parse_only=SoupStrainer('div', {'class': 'menu-secondary-container'})
+                             parse_only=self.SoupStrainer_Category
                              )
 
         items = []
 
         for item in soup.findAll('li'):
-            link = item.a['href'].encode('utf-8', 'ignore')
-            pk = item['id']
+            if item.a.has_attr('href'):
+                link = util.encode(item.a['href'])
+                pk = item['id']
 
-            # ignore invalid links
-            if 'category/' not in link:
-                continue
+                # ignore invalid links
+                if 'category/' not in link:
+                    continue
 
-            items.append({
-                'label': item.a.text,
-                'url': link,
-                'pk': pk,
-            })
+                items.append({
+                    'label': item.a.text,
+                    'url': link,
+                    'pk': pk,
+                })
 
         return items
 
@@ -60,7 +73,7 @@ class SiteApi():
 
         # Get list of movie titles
         soup = BeautifulSoup(data, 'html.parser',
-                             parse_only=SoupStrainer('div', {'class': 'entry clearfix'})
+                             parse_only=self.SoupStrainer_Movies
                              )
         items = []
 
@@ -68,10 +81,10 @@ class SiteApi():
 
         for item in soup:
             img = item.a.img
-            thumb = img['src'].encode('utf-8', 'ignore')
+            thumb = util.encode(img['src']) if img else ''
 
-            link = item.a['href'].encode('utf-8', 'ignore')
-            info = item.h4.text.strip()
+            link = util.encode(item.a['href'])
+            info = util.encode(item.text.strip())
             label = info
             pk = pk_regex.search(item.a['href']).group(1)
 
@@ -96,17 +109,20 @@ class SiteApi():
 
         # Get list of movie titles
         soup = BeautifulSoup(data, 'html.parser',
-                             parse_only=SoupStrainer('a', rel='next')
+                             parse_only=self.SoupStrainer_Next_Link
                              )
 
-        if soup:
+        if soup and soup.a:
             link = soup.a['href']
             page = link.rstrip('/').rsplit('/', 1)[1]
-            
+
             item = {
                 'label': '[B]Next >> [/B]',
+                'thumb': '',
+                'info': '',
                 'url': link,
-                'pk': page
+                'pk': page,
+                'is_playable': False
             }
             return item
 
@@ -118,7 +134,7 @@ class SiteApi():
         data = util.get_remote_data(url)
 
         soup = BeautifulSoup(data, 'html.parser',
-                             parse_only=SoupStrainer('a', rel='nofollow')
+                             parse_only=self.SoupStrainer_Movie_Link
                              )
         items = []
 
@@ -126,7 +142,7 @@ class SiteApi():
 
         for a in soup:
             if 'Full' in a.text and 'Online' in a.text:
-                link = a['href'].encode('utf-8', 'ignore')
+                link = util.encode(a['href'])
 
                 match = pk_regex.search(link)
                 if match:
@@ -153,13 +169,13 @@ class SiteApi():
 
         iframe = soup.find('iframe')
         if iframe:
-            link = iframe['data-lazy-src']
-            if not link:
-                link = iframe['src']
+            link = iframe.get('data-lazy-src', None) or \
+                iframe.get('src', None)
         else:
-            direct = soup.find('a', rel='nofollow')
+            direct = soup.find('a', rel='nofollow') or \
+                soup.find('a', {'class': 'main-button dlbutton'})
             if direct:
-                link = direct['href']
+                link = direct.get('href', None)
 
         print 'Resolving link: {link}'.format(link=link)
         return link

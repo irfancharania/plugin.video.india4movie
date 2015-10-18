@@ -2,4 +2,18 @@
 <strings>
   <!-- Plugin name -->
   <string id="30000">india4movie</string>
+
+  <!-- General -->
+  <string id="30050">Please try again</string>
+  <string id="30051">Website is unavailable</string>
+  <string id="30052">is unavailable at this time</string>
+  <string id="30053">Please try again at a later time</string>
+  <string id="30057">No valid links found.</string>
+  <string id="30058">Unable to play video</string>
+  <string id="30060">No search terms provided</string>
+  <string id="30061">Video url not found</string>
+  <string id="30062">Unresolvable link</string>
+
+  <!-- Options -->
+  <string id="30100">Url Resolver Settings</string>
 </strings>
