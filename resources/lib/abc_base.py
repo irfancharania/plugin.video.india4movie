@@ -84,7 +84,9 @@ class BaseI4M(object):
             thumb = util.encode(img['src']) if img else ''
 
             link = util.encode(item.a['href'])
-            info = util.encode(item.text.strip())
+
+            txt = item.text.strip() or item.a.get('title', None)
+            info = util.encode(txt.strip())
             label = info
             pk = pk_regex.search(item.a['href']).group(1)
 
