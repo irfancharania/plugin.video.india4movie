@@ -14,7 +14,7 @@ class FullNewMovieApi(BaseI4M):
     SoupStrainer_Category = SoupStrainer('div', {'class': 'menu-menu-container'})
     SoupStrainer_Movies = SoupStrainer('div', {'class': 'post-text'})
     SoupStrainer_Next_Link = SoupStrainer('div', {'class': 'nextpostslink'})
-    SoupStrainer_Movie_Link = SoupStrainer('div', {'class': 'post-text'})
+    SoupStrainer_Movie_Link = SoupStrainer('p')
 
 ###############################################
 
