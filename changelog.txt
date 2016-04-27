@@ -1,3 +1,5 @@
+0.2.1 - Update links resolver text
+
 0.2.0 - Update Full New Movie
 
 0.1.1 - Add Full New Movie

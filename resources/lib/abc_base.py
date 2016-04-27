@@ -143,7 +143,10 @@ class BaseI4M(object):
         pk_regex = re.compile('http://([\w\.]+)\/(?:([\w-]+)\/|)')
 
         for a in soup:
-            if 'Full' in a.text and 'Online' in a.text:
+            if ('Full' in a.text or \
+                'Play' in a.text) and \
+                'Online' in a.text:
+
                 link = util.encode(a['href'])
 
                 match = pk_regex.search(link)
@@ -174,8 +177,11 @@ class BaseI4M(object):
             link = iframe.get('data-lazy-src', None) or \
                 iframe.get('src', None)
         else:
-            direct = soup.find('a', rel='nofollow') or \
-                soup.find('a', {'class': 'main-button dlbutton'})
+            direct = soup.find('a', src=re.compile(r'embed')) or \
+                soup.find('a', {'class': 'aio-orange-medium'}) or \
+                soup.find('a', {'class': 'main-button dlbutton'}) or \
+                soup.find('a', rel='nofollow')
+
             if direct:
                 link = direct.get('href', None)
 
