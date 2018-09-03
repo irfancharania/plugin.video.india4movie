@@ -1,11 +1,14 @@
-#India4movie for XBMC/Kodi
+# DEPRECATED: I don't use this addon and don't plan on updating/fixing it. If you have contributions, I'm happy to accept.
+
+
+# India4movie for XBMC/Kodi
 
 Quick and dirty addon to scrape [India4movie](http://www.india4movie.co/), [MovieRulz](http://www.movierulz.to/) and [FullNewMovie](http://www.fullnewmovie.net) for movies.
 
 **Still needs lots of work. Not fully tested.**
 
 
-##Dependencies
+## Dependencies
 
 The addon relies on the following addons to resolve/play videos
 
